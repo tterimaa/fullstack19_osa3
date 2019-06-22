@@ -8,6 +8,7 @@ morgan.token('pb', (req, res) => {
     if(req.method === 'POST') return JSON.stringify(req.body)
 })
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :pb'))
+app.use(express.static('build'))
 
 let persons = [
     {
