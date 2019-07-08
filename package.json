@@ -9,13 +9,16 @@
     "watch": "nodemon index.js",
     "build:ui": "rm -rf build && cd ../fullstack19/osa2/puhelinluettelo && npm run build --prod && cp -r build ../../../fullstack_osa3/",
     "deploy": "git push heroku master",
-    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push && npm run deploy",    
+    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push && npm run deploy",
     "logs:prod": "heroku logs --tail"
   },
   "author": "Tarmo Terimaa",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^8.0.0",
     "express": "^4.17.1",
+    "mongoose": "^5.6.3",
     "morgan": "^1.9.1"
   },
   "devDependencies": {

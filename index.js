@@ -1,8 +1,12 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
+const cors = require('cors')
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
+const Person = require('./models/person')
 
+app.use(cors())
 app.use(bodyParser.json())
 morgan.token('pb', (req, res) => {
     if(req.method === 'POST') return JSON.stringify(req.body)
@@ -10,49 +14,26 @@ morgan.token('pb', (req, res) => {
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :pb'))
 app.use(express.static('build'))
 
-let persons = [
-    {
-        id: 1,
-        nimi: "Arto Hellas",
-        numero: 123456
-    },
-    {
-        id: 2,
-        nimi: "Aku Ankka",
-        numero: 56789
-    }
-]
-
 const generateId = () => {
     const number = Math.floor(Math.random() * 100000)
-    console.log(number)
     return number
 }
 
 app.post('/api/persons', (req, res) => {
     const body = req.body
 
-    if(!body.nimi || !body.numero) {
-        return res.status(404).json({
-            error: 'nimi tai numero puuttuu'
-        })
-    }
+  if (body === undefined) {
+    return res.status(400).json({ error: 'content missing' })
+  }
 
-    if(persons.map(p => p.nimi).includes(body.nimi)) {
-        return res.status(404).json({
-            error: 'nimi on jo luettelossa'
-        })
-    }
+  const person = new Person({
+    nimi: body.nimi,
+    numero: body.numero
+  })
 
-    const person = {
-        id: generateId(),
-        nimi: body.nimi,
-        numero: body.numero
-    }
-
-    res.json(person)
-
-    persons = persons.concat(person)
+  person.save().then(savedPerson => {
+    res.json(savedPerson.toJSON())
+  })
 })
 
 app.get('/info', (req, res) => {
@@ -67,21 +48,28 @@ app.delete('/api/persons/:id', (req, res) => {
 })
 
 app.get('/api/persons', (req, res) => {
-    res.json(persons)
+    Person.find({}).then(persons => {
+        res.json(persons.map(person => person.toJSON()))
+    })
 })
 
-app.get('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    const person = persons.find(p => p.id === id)
-
-    if(person) {
-        res.json(person)
-    } else {
-        res.status(404).end()
-    }
+app.get('/api/persons:id', (req, res) => {
+    console.log(req)
+    Person.findById(req.params.id)
+    .then(person => {
+      if (person) {
+        res.json(person.toJSON())
+      } else {
+        res.status(404).end() 
+      }
+    })
+    .catch(error => {
+      console.log(error)
+      res.status(400).send({ error: 'malformatted id' })
+    })
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
