@@ -42,8 +42,8 @@ if(addFlag) {
     id: Math.floor(Math.random() * 100000)
   })
   newPerson.save().then(response => {
-    console.log(`added ${name} number ${number} to phonebook`);
-    mongoose.connection.close();
+    console.log(`added ${name} number ${number} to phonebook`)
+    mongoose.connection.close()
   })
 } else if ( process.argv.length === 3) {
   Person.find({}).then((result) => {
